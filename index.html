@@ -1,3 +1,148 @@
-hello 
-加油
-加油
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>静态网站示例</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        input[type="text"], input[type="password"], input[type="file"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .post-content {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 注册界面 -->
+    <div class="container" id="registerPage">
+        <h1>注册</h1>
+        <input type="text" placeholder="用户名" id="registerUsername">
+        <input type="password" placeholder="密码" id="registerPassword">
+        <button onclick="showLoginPage()">注册</button>
+    </div>
+
+    <!-- 登录界面 -->
+    <div class="container" id="loginPage" style="display:none;">
+        <h1>登录</h1>
+        <input type="text" placeholder="用户名" id="loginUsername">
+        <input type="password" placeholder="密码" id="loginPassword">
+        <button onclick="login()">登录</button>
+    </div>
+
+    <!-- 内容发布界面 -->
+    <div class="container" id="contentPage" style="display:none;">
+        <h1>发布内容</h1>
+        <textarea placeholder="发布文字内容..." id="textContent"></textarea>
+        <input type="file" id="imageContent" accept="image/*">
+        <input type="file" id="videoContent" accept="video/*">
+        <button onclick="postContent()">发布</button>
+        
+        <!-- 显示发布内容 -->
+        <div class="post-content" id="postContainer">
+            <h2>发布的内容：</h2>
+        </div>
+    </div>
+
+    <script>
+        // 切换到登录页面
+        function showLoginPage() {
+            document.getElementById("registerPage").style.display = "none";
+            document.getElementById("loginPage").style.display = "block";
+        }
+
+        // 登录功能
+        function login() {
+            const username = document.getElementById("loginUsername").value;
+            const password = document.getElementById("loginPassword").value;
+            // 简单的静态验证示例
+            if (username && password) {
+                document.getElementById("loginPage").style.display = "none";
+                document.getElementById("contentPage").style.display = "block";
+            } else {
+                alert("请输入用户名和密码！");
+            }
+        }
+
+        // 发布内容
+        function postContent() {
+            const textContent = document.getElementById("textContent").value;
+            const imageContent = document.getElementById("imageContent").files[0];
+            const videoContent = document.getElementById("videoContent").files[0];
+
+            const postContainer = document.getElementById("postContainer");
+
+            // 创建一个新的发布内容区块
+            const post = document.createElement("div");
+            post.style.border = "1px solid #ccc";
+            post.style.padding = "10px";
+            post.style.margin = "10px 0";
+            post.style.borderRadius = "5px";
+            
+            // 添加文字内容
+            if (textContent) {
+                const textElement = document.createElement("p");
+                textElement.textContent = textContent;
+                post.appendChild(textElement);
+            }
+
+            // 添加图片内容
+            if (imageContent) {
+                const imageElement = document.createElement("img");
+                imageElement.src = URL.createObjectURL(imageContent);
+                imageElement.style.width = "100%";
+                imageElement.style.maxHeight = "200px";
+                imageElement.style.objectFit = "cover";
+                post.appendChild(imageElement);
+            }
+
+            // 添加视频内容
+            if (videoContent) {
+                const videoElement = document.createElement("video");
+                videoElement.src = URL.createObjectURL(videoContent);
+                videoElement.controls = true;
+                videoElement.style.width = "100%";
+                videoElement.style.maxHeight = "300px";
+                post.appendChild(videoElement);
+            }
+
+            // 把发布的内容添加到发布区块
+            postContainer.appendChild(post);
+        }
+    </script>
+</body>
+</html>
