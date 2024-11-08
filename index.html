@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>静态网站示例 - 注册与登录</title>
+    <title>静态网站示例 - 注册、登录与主页</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,7 +14,7 @@
             margin: 0;
             background-color: #f0f2f5;
         }
-        .container {
+        .container, .homepage {
             width: 100%;
             max-width: 400px;
             padding: 20px;
@@ -25,14 +25,9 @@
         }
         h1 {
             font-size: 1.8em;
-            margin-bottom: 10px;
             color: #333;
         }
-        p {
-            color: #666;
-            font-size: 0.9em;
-        }
-        input[type="text"], input[type="password"] {
+        input[type="text"], input[type="password"], textarea {
             width: 100%;
             padding: 12px;
             margin: 10px 0;
@@ -47,12 +42,8 @@
             color: white;
             border: none;
             border-radius: 5px;
-            font-size: 1em;
             cursor: pointer;
             margin-top: 10px;
-        }
-        button:hover {
-            background-color: #45a049;
         }
         .social-login {
             display: flex;
@@ -77,16 +68,153 @@
             cursor: pointer;
             font-size: 0.9em;
         }
+        .content-section {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .post {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .post img, .post video {
+            width: 100%;
+            border-radius: 5px;
+            max-height: 200px;
+        }
     </style>
 </head>
 <body>
     <!-- 注册界面 -->
     <div class="container" id="registerPage">
         <h1>注册</h1>
-        <p>创建一个新的账户，或通过社交平台快速注册。</p>
         <input type="text" placeholder="用户名" id="registerUsername">
         <input type="password" placeholder="密码" id="registerPassword">
-        <button onclick="showLoginPage()">注册</button>
+        <button onclick="register()">注册</button>
         
         <!-- 社交媒体一键登录 -->
-        <div class="s
+        <div class="social-login">
+            <div class="social-btn google" onclick="socialLogin('Google')">谷歌</div>
+            <div class="social-btn wechat" onclick="socialLogin('WeChat')">微信</div>
+            <div class="social-btn qq" onclick="socialLogin('QQ')">QQ</div>
+        </div>
+        
+        <p>已有账户？<span class="switch-link" onclick="showLoginPage()">登录</span></p>
+    </div>
+
+    <!-- 登录界面 -->
+    <div class="container" id="loginPage" style="display:none;">
+        <h1>登录</h1>
+        <input type="text" placeholder="用户名" id="loginUsername">
+        <input type="password" placeholder="密码" id="loginPassword">
+        <button onclick="login()">登录</button>
+
+        <div class="social-login">
+            <div class="social-btn google" onclick="socialLogin('Google')">谷歌</div>
+            <div class="social-btn wechat" onclick="socialLogin('WeChat')">微信</div>
+            <div class="social-btn qq" onclick="socialLogin('QQ')">QQ</div>
+        </div>
+
+        <p>还没有账户？<span class="switch-link" onclick="showRegisterPage()">注册</span></p>
+    </div>
+
+    <!-- 主页 -->
+    <div class="homepage" id="homepage" style="display:none;">
+        <h1>主页</h1>
+        <div class="content-section" id="textSection">
+            <h2>发布文字</h2>
+            <textarea placeholder="在这里写下你的文字..." id="textContent"></textarea>
+            <button onclick="postContent('text')">发布</button>
+        </div>
+        
+        <div class="content-section" id="imageSection">
+            <h2>发布图片</h2>
+            <input type="file" id="imageContent" accept="image/*">
+            <button onclick="postContent('image')">发布</button>
+        </div>
+        
+        <div class="content-section" id="videoSection">
+            <h2>发布视频</h2>
+            <input type="file" id="videoContent" accept="video/*">
+            <button onclick="postContent('video')">发布</button>
+        </div>
+
+        <div class="content-section" id="postContainer">
+            <h2>已发布内容</h2>
+        </div>
+    </div>
+
+    <script>
+        function showLoginPage() {
+            document.getElementById("registerPage").style.display = "none";
+            document.getElementById("loginPage").style.display = "block";
+        }
+
+        function showRegisterPage() {
+            document.getElementById("loginPage").style.display = "none";
+            document.getElementById("registerPage").style.display = "block";
+        }
+
+        function register() {
+            alert("注册成功！");
+            showHomepage();
+        }
+
+        function login() {
+            const username = document.getElementById("loginUsername").value;
+            const password = document.getElementById("loginPassword").value;
+            if (username && password) {
+                alert("登录成功！");
+                showHomepage();
+            } else {
+                alert("请输入用户名和密码！");
+            }
+        }
+
+        function socialLogin(platform) {
+            alert(platform + " 一键登录成功！");
+            showHomepage();
+        }
+
+        function showHomepage() {
+            document.getElementById("registerPage").style.display = "none";
+            document.getElementById("loginPage").style.display = "none";
+            document.getElementById("homepage").style.display = "block";
+        }
+
+        function postContent(type) {
+            const postContainer = document.getElementById("postContainer");
+            const post = document.createElement("div");
+            post.className = "post";
+
+            if (type === 'text') {
+                const textContent = document.getElementById("textContent").value;
+                post.textContent = textContent;
+            } else if (type === 'image') {
+                const imageContent = document.getElementById("imageContent").files[0];
+                if (imageContent) {
+                    const imageElement = document.createElement("img");
+                    imageElement.src = URL.createObjectURL(imageContent);
+                    post.appendChild(imageElement);
+                }
+            } else if (type === 'video') {
+                const videoContent = document.getElementById("videoContent").files[0];
+                if (videoContent) {
+                    const videoElement = document.createElement("video");
+                    videoElement.src = URL.createObjectURL(videoContent);
+                    videoElement.controls = true;
+                    post.appendChild(videoElement);
+                }
+            }
+
+            if (post.children.length > 0 || post.textContent) {
+                postContainer.appendChild(post);
+            }
+        }
+    </script>
+</body>
+</html>
