@@ -26,7 +26,7 @@
         h1 {
             text-align: center;
         }
-        input[type="text"], input[type="password"], input[type="file"], textarea {
+        input[type="text"], input[type="password"], textarea {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -41,10 +41,25 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin-top: 10px;
         }
-        .post-content {
-            margin-top: 20px;
+        .social-login {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
         }
+        .social-btn {
+            width: 32%;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .google { background-color: #DB4437; }
+        .wechat { background-color: #07C160; }
+        .qq { background-color: #498AD6; }
     </style>
 </head>
 <body>
@@ -54,6 +69,13 @@
         <input type="text" placeholder="用户名" id="registerUsername">
         <input type="password" placeholder="密码" id="registerPassword">
         <button onclick="showLoginPage()">注册</button>
+        
+        <!-- 社交媒体一键登录 -->
+        <div class="social-login">
+            <div class="social-btn google" onclick="socialLogin('Google')">谷歌一键登录</div>
+            <div class="social-btn wechat" onclick="socialLogin('WeChat')">微信一键登录</div>
+            <div class="social-btn qq" onclick="socialLogin('QQ')">QQ一键登录</div>
+        </div>
     </div>
 
     <!-- 登录界面 -->
@@ -85,11 +107,15 @@
             document.getElementById("loginPage").style.display = "block";
         }
 
+        // 模拟社交登录
+        function socialLogin(platform) {
+            alert(platform + " 登录功能暂未实现，但UI展示已完成！");
+        }
+
         // 登录功能
         function login() {
             const username = document.getElementById("loginUsername").value;
             const password = document.getElementById("loginPassword").value;
-            // 简单的静态验证示例
             if (username && password) {
                 document.getElementById("loginPage").style.display = "none";
                 document.getElementById("contentPage").style.display = "block";
@@ -103,7 +129,6 @@
             const textContent = document.getElementById("textContent").value;
             const imageContent = document.getElementById("imageContent").files[0];
             const videoContent = document.getElementById("videoContent").files[0];
-
             const postContainer = document.getElementById("postContainer");
 
             // 创建一个新的发布内容区块
@@ -112,15 +137,12 @@
             post.style.padding = "10px";
             post.style.margin = "10px 0";
             post.style.borderRadius = "5px";
-            
-            // 添加文字内容
+
             if (textContent) {
                 const textElement = document.createElement("p");
                 textElement.textContent = textContent;
                 post.appendChild(textElement);
             }
-
-            // 添加图片内容
             if (imageContent) {
                 const imageElement = document.createElement("img");
                 imageElement.src = URL.createObjectURL(imageContent);
@@ -129,8 +151,6 @@
                 imageElement.style.objectFit = "cover";
                 post.appendChild(imageElement);
             }
-
-            // 添加视频内容
             if (videoContent) {
                 const videoElement = document.createElement("video");
                 videoElement.src = URL.createObjectURL(videoContent);
@@ -139,8 +159,6 @@
                 videoElement.style.maxHeight = "300px";
                 post.appendChild(videoElement);
             }
-
-            // 把发布的内容添加到发布区块
             postContainer.appendChild(post);
         }
     </script>
