@@ -1,30 +1,270 @@
-from django.db import models
-from django.utils import timezone
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日记账</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 350px;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .logo {
+            width: 100px;
+            margin-bottom: 20px;
+        }
+        input[type="date"],
+        input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .entry {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .income {
+            background-color: #e8ffe8;
+            color: green;
+        }
+        .expense {
+            background-color: #ffe8e8;
+            color: red;
+        }
+        .edit-button {
+            background-color: #007bff;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .edit-button:hover {
+            background-color: #0056b3;
+        }
+        .type-select {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://img.alicdn.com/tfs/TB1QJdwvRr0gK0jSZFnXXbRRXXa-200-200.png" alt="Logo" class="logo">
+        <h1>每日记账</h1>
+        <input type="date" id="dateInput">
+        <textarea id="description" placeholder="描述..."></textarea>
+        <input type="number" id="amount" placeholder="金额...">
+        <button onclick="addEntry()">添加条目</button>
+        <div id="entriesContainer"></div>
+    </div>
 
-class Product(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    stock = models.IntegerField(default=0)
+    <script>
+        document.getElementById('dateInput').valueAsDate = new Date();
 
-    def __str__(self):
-        return self.name
+        function determineType(description) {
+            const incomeKeywords = ['收入', '收款', '存款', '工资', '奖金'];
+            const expenseKeywords = ['支出', '付款', '消费', '购物', '费用'];
 
-class CardCode(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    code = models.CharField(max_length=100)
-    is_sold = models.BooleanField(default=False)
+            for (let keyword of incomeKeywords) {
+                if (description.includes(keyword)) {
+                    return 'income';
+                }
+            }
+            for (let keyword of expenseKeywords) {
+                if (description.includes(keyword)) {
+                    return 'expense';
+                }
+            }
+            // 默认返回 'expense' 如果没有匹配到任何关键字
+            return 'expense';
+        }
 
-    def __str__(self):
-        return f"{self.product.name} - {self.code}"
+        function addEntry() {
+            const date = document.getElementById('dateInput').value;
+            const description = document.getElementById('description').value;
+            const amountInput = document.getElementById('amount').value;
+            const amount = parseFloat(amountInput);
 
-class Order(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    order_date = models.DateTimeField(default=timezone.now)
-    is_paid = models.BooleanField(default=False)
-    card_code = models.ForeignKey(CardCode, on_delete=models.SET_NULL, null=True, blank=True)
+            if (!date || !description || isNaN(amount)) {
+                alert('请输入有效的日期、描述和金额');
+                return;
+            }
 
-    def __str__(self):
-        return f"Order #{self.id} - {self.product.name}"
+            const type = determineType(description);
+
+            const entry = {
+                date,
+                description,
+                amount,
+                type
+            };
+
+            let entries = JSON.parse(localStorage.getItem('entries')) || [];
+            entries.push(entry);
+            localStorage.setItem('entries', JSON.stringify(entries));
+
+            renderEntries();
+            document.getElementById('description').value = '';
+            document.getElementById('amount').value = '';
+        }
+
+        function editEntry(index) {
+            let entries = JSON.parse(localStorage.getItem('entries')) || [];
+            const entry = entries[index];
+
+            document.getElementById('dateInput').value = entry.date;
+            document.getElementById('description').value = entry.description;
+            document.getElementById('amount').value = entry.amount;
+
+            // Create a select element for type selection
+            const typeSelect = document.createElement('select');
+            typeSelect.className = 'type-select';
+            typeSelect.id = 'typeSelect';
+            const incomeOption = document.createElement('option');
+            incomeOption.value = 'income';
+            incomeOption.text = '收入';
+            const expenseOption = document.createElement('option');
+            expenseOption.value = 'expense';
+            expenseOption.text = '支出';
+
+            typeSelect.add(incomeOption);
+            typeSelect.add(expenseOption);
+            typeSelect.value = entry.type;
+
+            // Replace the buttons with the select and save button
+            const container = document.querySelector('.container');
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.className = 'button-container';
+
+            const saveButton = document.createElement('button');
+            saveButton.textContent = '保存';
+            saveButton.onclick = () => saveEditedEntry(index, typeSelect.value);
+
+            buttonsContainer.appendChild(typeSelect);
+            buttonsContainer.appendChild(saveButton);
+            container.replaceChild(buttonsContainer, document.querySelector('button'));
+
+            // Remove the entry after editing
+            entries.splice(index, 1);
+            localStorage.setItem('entries', JSON.stringify(entries));
+        }
+
+        function saveEditedEntry(index, type) {
+            const date = document.getElementById('dateInput').value;
+            const description = document.getElementById('description').value;
+            const amountInput = document.getElementById('amount').value;
+            const amount = parseFloat(amountInput);
+
+            if (!date || !description || isNaN(amount)) {
+                alert('请输入有效的日期、描述和金额');
+                return;
+            }
+
+            const entry = {
+                date,
+                description,
+                amount,
+                type
+            };
+
+            let entries = JSON.parse(localStorage.getItem('entries')) || [];
+            entries.splice(index, 0, entry);
+            localStorage.setItem('entries', JSON.stringify(entries));
+
+            renderEntries();
+            resetForm();
+        }
+
+        function resetForm() {
+            document.getElementById('description').value = '';
+            document.getElementById('amount').value = '';
+            document.getElementById('dateInput').valueAsDate = new Date();
+
+            // Restore original button
+            const container = document.querySelector('.container');
+            const button = document.createElement('button');
+            button.textContent = '添加条目';
+            button.onclick = addEntry;
+            container.replaceChild(button, document.querySelector('.button-container'));
+        }
+
+        function renderEntries() {
+            const container = document.getElementById('entriesContainer');
+            container.innerHTML = '';
+
+            let entries = JSON.parse(localStorage.getItem('entries')) || [];
+
+            entries.forEach((entry, index) => {
+                const div = document.createElement('div');
+                div.className = `entry ${entry.type}`;
+                const formattedAmount = typeof entry.amount === 'number' ? entry.amount.toFixed(2) : '0.00';
+                div.textContent = `${entry.date}: ¥${formattedAmount} - ${entry.description}`;
+
+                const editButton = document.createElement('button');
+                editButton.className = 'edit-button';
+                editButton.textContent = '编辑';
+                editButton.onclick = () => editEntry(index);
+
+                div.appendChild(editButton);
+                container.appendChild(div);
+            });
+        }
+
+        window.onload = () => {
+            // 自动填充当前日期
+            document.getElementById('dateInput').valueAsDate = new Date();
+            renderEntries();
+        };
+    </script>
+</body>
+</html>
+
+
+
+
+
+
